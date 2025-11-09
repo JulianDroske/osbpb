@@ -16,7 +16,19 @@ typedef struct { const char *name; int value; } lualinux_constant_t;
 
 int lualinux_chroot(lua_State *L) {
   const char *pathname = luaL_checkstring(L, 1);
+
   int ret = chroot(pathname);
+
+  lua_pushinteger(L, ret);
+  return 1;
+}
+
+int lualinux_pivot_root(lua_State *L) {
+  const char *new_root = luaL_checkstring(L, 1);
+  const char *put_old = luaL_checkstring(L, 1);
+
+  int ret = syscall(SYS_pivot_root, new_root, put_old);
+
   lua_pushinteger(L, ret);
   return 1;
 }
@@ -54,11 +66,12 @@ int lualinux_unshare(lua_State *L) {
 }
 
 const luaL_Reg lualinux_funcs[] = {
-  { "chroot",  lualinux_chroot },
-  { "mount",   lualinux_mount },
-  { "umount",  lualinux_umount },
-  { "unshare", lualinux_unshare },
-  { NULL,      NULL }
+  { "chroot",      lualinux_chroot },
+  { "mount",       lualinux_mount },
+  { "umount",      lualinux_umount },
+  { "unshare",     lualinux_unshare },
+  { "pivot_root",  lualinux_pivot_root },
+  { NULL,          NULL }
 };
 
 const lualinux_constant_t lualinux_constants[] = {
